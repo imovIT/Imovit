@@ -1,38 +1,82 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ImovIT - Central de Serviços Municipais</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <meta charset="UTF-8">
+  <title>ImovIT - Prefeituras</title>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.1/papaparse.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    #search {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 16px;
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <img src="logo-imovit.png" alt="Logo ImovIT" class="logo">
-        <h1>ImovIT</h1>
-        <p>Central de informações sobre IPTU, ITBI e CND das prefeituras do Brasil</p>
-    </header>
-    <main>
-        <section class="intro">
-            <h2>O que é o ImovIT?</h2>
-            <p>Um projeto público colaborativo que centraliza links e informações sobre emissão de boletos, certidões e guias diretamente nos sites das prefeituras brasileiras.</p>
-        </section>
-        <section class="contribua">
-            <h2>Ajude a expandir a base</h2>
-            <p>Se a sua cidade ainda não está aqui, você pode contribuir preenchendo o formulário abaixo:</p>
-            <a href="https://forms.gle/SEU-LINK-AQUI" class="botao" target="_blank">Contribuir com informações</a>
-        </section>
-        <section class="lista">
-            <h2>Prefeituras já cadastradas</h2>
-            <ul>
-                <li><strong>São Paulo (SP)</strong>: <a href="#">IPTU</a> | <a href="#">ITBI</a> | <a href="#">CND</a></li>
-                <li><strong>Rio de Janeiro (RJ)</strong>: <a href="#">IPTU</a> | <a href="#">ITBI</a> | <a href="#">CND</a></li>
-            </ul>
-        </section>
-    </main>
-    <footer>
-        <p>Projeto público e gratuito. Desenvolvido com ♥</p>
-    </footer>
+  <h1>ImovIT - Lista de Prefeituras</h1>
+  <p>Veja abaixo a lista de prefeituras com links e informações sobre emissão de IPTU, ITBI e CNDs.</p>
+
+  <input type="text" id="search" placeholder="🔍 Buscar por município ou estado...">
+
+  <div id="table-container"></div>
+
+  <script>
+    // Carrega e mostra a tabela a partir do CSV
+    Papa.parse("PREFEITURAS - Página1.csv", {
+      download: true,
+      header: true,
+      complete: function(results) {
+        const data = results.data;
+        let table = '<table><thead><tr>';
+
+        // Cabeçalhos
+        for (let key in data[0]) {
+          table += `<th>${key}</th>`;
+        }
+        table += '</tr></thead><tbody>';
+
+        // Linhas
+        data.forEach(row => {
+          table += '<tr>';
+          for (let key in row) {
+            table += `<td>${row[key]}</td>`;
+          }
+          table += '</tr>';
+        });
+
+        table += '</tbody></table>';
+        $('#table-container').html(table);
+      }
+    });
+
+    // Busca na tabela
+    $(document).on('input', '#search', function() {
+      const value = $(this).val().toLowerCase();
+      $('#table-container table tbody tr').filter(function() {
+        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+      });
+    });
+  </script>
 </body>
 </html>
