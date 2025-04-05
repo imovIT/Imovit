@@ -124,3 +124,18 @@
   </script>
 </body>
 </html>
+<script>
+  const searchInput = document.getElementById("search");
+  const table = document.getElementById("data-table");
+
+  searchInput.addEventListener("input", function () {
+    const filter = searchInput.value.toLowerCase();
+    const rows = table.getElementsByTagName("tr");
+
+    for (let i = 1; i < rows.length; i++) {
+      const row = rows[i];
+      const text = row.textContent.toLowerCase();
+      row.style.display = text.includes(filter) ? "" : "none";
+    }
+  });
+</script>
