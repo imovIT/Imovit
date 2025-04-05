@@ -1,141 +1,88 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ImovIT - Prefeituras do Brasil</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <meta charset="UTF-8">
+  <title>ImovIT - Consulta de Prefeituras</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 40px;
-      background-color: #f4f4f4;
+      padding: 20px;
+      max-width: 1200px;
+      margin: auto;
     }
-
     h1 {
       text-align: center;
     }
-
-    #search {
-      display: block;
-      margin: 20px auto;
+    input[type="text"] {
+      margin-bottom: 10px;
       padding: 8px;
-      width: 80%;
-      max-width: 400px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-
-    table {
-      border-collapse: collapse;
       width: 100%;
-      background-color: white;
+      max-width: 400px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
       margin-top: 20px;
     }
-
     th, td {
-      border: 1px solid #ccc;
       padding: 10px;
+      border: 1px solid #ddd;
       text-align: left;
     }
-
     th {
-      background-color: #e2e2e2;
+      background-color: #f2f2f2;
     }
-
-    tr:hover {
-      background-color: #f1f1f1;
-    }
-
-    .footer {
-      margin-top: 40px;
-      text-align: center;
-      font-size: 14px;
-      color: #777;
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
     }
   </style>
 </head>
 <body>
-  <h1>ImovIT - Prefeituras do Brasil</h1>
-  <input type="text" id="search" placeholder="Buscar prefeitura, estado ou link...">
+  <h1>ImovIT - Consulta de Prefeituras</h1>
+  <p>Consulte abaixo as informações sobre IPTU, ITBI e CNDs das prefeituras do Brasil.</p>
+
+  <input type="text" id="search" placeholder="Buscar prefeitura, cidade, estado...">
+
   <table id="data-table">
-    <thead id="table-head"></thead>
-    <tbody id="table-body"></tbody>
+    <thead>
+      <tr>
+        <th>Estado</th>
+        <th>Cidade</th>
+        <th>Site</th>
+        <th>IPTU</th>
+        <th>ITBI</th>
+        <th>CND</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>SP</td>
+        <td>São Paulo</td>
+        <td><a href="https://www.prefeitura.sp.gov.br" target="_blank">Site</a></td>
+        <td><a href="https://iptu.prefeitura.sp.gov.br" target="_blank">IPTU</a></td>
+        <td><a href="https://itbi.prefeitura.sp.gov.br" target="_blank">ITBI</a></td>
+        <td><a href="https://cnd.prefeitura.sp.gov.br" target="_blank">CND</a></td>
+      </tr>
+      <tr>
+        <td>RJ</td>
+        <td>Rio de Janeiro</td>
+        <td><a href="https://www.rio.rj.gov.br" target="_blank">Site</a></td>
+        <td><a href="https://iptu.rio.rj.gov.br" target="_blank">IPTU</a></td>
+        <td><a href="https://itbi.rio.rj.gov.br" target="_blank">ITBI</a></td>
+        <td><a href="https://cnd.rio.rj.gov.br" target="_blank">CND</a></td>
+      </tr>
+      <!-- Adicione mais linhas aqui -->
+    </tbody>
   </table>
 
-  <div class="footer">
-    Projeto colaborativo para centralizar informações de IPTU, ITBI e CND das prefeituras do Brasil.
-  </div>
-
   <script>
-    function renderTable(data) {
-      const tableHead = document.getElementById("table-head");
-      const tableBody = document.getElementById("table-body");
-
-      tableHead.innerHTML = "";
-      tableBody.innerHTML = "";
-
-      if (data.length === 0) return;
-
-      // Cabeçalho
-      const headers = Object.keys(data[0]);
-      const headerRow = document.createElement("tr");
-      headers.forEach(header => {
-        const th = document.createElement("th");
-        th.textContent = header;
-        headerRow.appendChild(th);
+    document.getElementById("search").addEventListener("keyup", function () {
+      const searchValue = this.value.toLowerCase();
+      const rows = document.querySelectorAll("#data-table tbody tr");
+      rows.forEach(row => {
+        row.style.display = row.textContent.toLowerCase().includes(searchValue) ? "" : "none";
       });
-      tableHead.appendChild(headerRow);
-
-      // Linhas
-      data.forEach(row => {
-        const tr = document.createElement("tr");
-        headers.forEach(header => {
-          const td = document.createElement("td");
-          td.innerHTML = row[header] || "";
-          tr.appendChild(td);
-        });
-        tableBody.appendChild(tr);
-      });
-    }
-
-    function filterTable(data, query) {
-      query = query.toLowerCase();
-      return data.filter(row =>
-        Object.values(row).some(
-          value => value && value.toLowerCase().includes(query)
-        )
-      );
-    }
-
-    Papa.parse("prefeituras.csv", {
-      download: true,
-      header: true,
-      complete: function(results) {
-        let tableData = results.data;
-        renderTable(tableData);
-
-        document.getElementById("search").addEventListener("input", function() {
-          const filteredData = filterTable(tableData, this.value);
-          renderTable(filteredData);
-        });
-      }
     });
   </script>
 </body>
 </html>
-<script>
-  const searchInput = document.getElementById("search");
-  const table = document.getElementById("data-table");
-
-  searchInput.addEventListener("input", function () {
-    const filter = searchInput.value.toLowerCase();
-    const rows = table.getElementsByTagName("tr");
-
-    for (let i = 1; i < rows.length; i++) {
-      const row = rows[i];
-      const text = row.textContent.toLowerCase();
-      row.style.display = text.includes(filter) ? "" : "none";
-    }
-  });
-</script>
