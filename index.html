@@ -1,81 +1,125 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>ImovIT - Prefeituras</title>
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.1/papaparse.min.js"></script>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ImovIT - Prefeituras do Brasil</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 20px;
+      margin: 40px;
+      background-color: #f4f4f4;
     }
+
     h1 {
       text-align: center;
     }
+
+    #search {
+      display: block;
+      margin: 20px auto;
+      padding: 8px;
+      width: 80%;
+      max-width: 400px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
     table {
       border-collapse: collapse;
       width: 100%;
+      background-color: white;
       margin-top: 20px;
     }
+
     th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-    }
-    th {
-      background-color: #f2f2f2;
-    }
-    #search {
-      width: 100%;
+      border: 1px solid #ccc;
       padding: 10px;
-      margin-top: 10px;
-      font-size: 16px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #e2e2e2;
+    }
+
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+
+    .footer {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 14px;
+      color: #777;
     }
   </style>
 </head>
 <body>
-  <h1>ImovIT - Lista de Prefeituras</h1>
-  <p>Veja abaixo a lista de prefeituras com links e informações sobre emissão de IPTU, ITBI e CNDs.</p>
+  <h1>ImovIT - Prefeituras do Brasil</h1>
+  <input type="text" id="search" placeholder="Buscar prefeitura, estado ou link...">
+  <table id="data-table">
+    <thead id="table-head"></thead>
+    <tbody id="table-body"></tbody>
+  </table>
 
-  <input type="text" id="search" placeholder="🔍 Buscar por município ou estado...">
-
-  <div id="table-container"></div>
+  <div class="footer">
+    Projeto colaborativo para centralizar informações de IPTU, ITBI e CND das prefeituras do Brasil.
+  </div>
 
   <script>
-    // Carrega e mostra a tabela a partir do CSV
-    Papa.parse("PREFEITURAS - Página1.csv", {
+    function renderTable(data) {
+      const tableHead = document.getElementById("table-head");
+      const tableBody = document.getElementById("table-body");
+
+      tableHead.innerHTML = "";
+      tableBody.innerHTML = "";
+
+      if (data.length === 0) return;
+
+      // Cabeçalho
+      const headers = Object.keys(data[0]);
+      const headerRow = document.createElement("tr");
+      headers.forEach(header => {
+        const th = document.createElement("th");
+        th.textContent = header;
+        headerRow.appendChild(th);
+      });
+      tableHead.appendChild(headerRow);
+
+      // Linhas
+      data.forEach(row => {
+        const tr = document.createElement("tr");
+        headers.forEach(header => {
+          const td = document.createElement("td");
+          td.innerHTML = row[header] || "";
+          tr.appendChild(td);
+        });
+        tableBody.appendChild(tr);
+      });
+    }
+
+    function filterTable(data, query) {
+      query = query.toLowerCase();
+      return data.filter(row =>
+        Object.values(row).some(
+          value => value && value.toLowerCase().includes(query)
+        )
+      );
+    }
+
+    Papa.parse("prefeituras.csv", {
       download: true,
       header: true,
       complete: function(results) {
-        const data = results.data;
-        let table = '<table><thead><tr>';
+        let tableData = results.data;
+        renderTable(tableData);
 
-        // Cabeçalhos
-        for (let key in data[0]) {
-          table += `<th>${key}</th>`;
-        }
-        table += '</tr></thead><tbody>';
-
-        // Linhas
-        data.forEach(row => {
-          table += '<tr>';
-          for (let key in row) {
-            table += `<td>${row[key]}</td>`;
-          }
-          table += '</tr>';
+        document.getElementById("search").addEventListener("input", function() {
+          const filteredData = filterTable(tableData, this.value);
+          renderTable(filteredData);
         });
-
-        table += '</tbody></table>';
-        $('#table-container').html(table);
       }
-    });
-
-    // Busca na tabela
-    $(document).on('input', '#search', function() {
-      const value = $(this).val().toLowerCase();
-      $('#table-container table tbody tr').filter(function() {
-        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
-      });
     });
   </script>
 </body>
